@@ -206,7 +206,8 @@ class GUI_measure_IV():
             x=np.array(self.x)
             y=np.array(self.y)
             p=np.array(self.p)
-            data=np.append(x[:,np.newaxis],y[:,np.newaxis],p[:,np.newaxis],axis=1)
+            data=np.append(x[:,np.newaxis],y[:,np.newaxis],axis=1)
+            data=np.append(data,p[:,np.newaxis],axis=1)
             fmtlist=['%.6e','%.6e','%.6e']
             filename = asksaveasfilename(title="Select the folder to save the processed data.", initialdir=self.savedir,filetypes=[("E60 tab sep file","*.iv")],initialfile='Measured_IV')
             if filename:
