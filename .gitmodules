@@ -8,4 +8,5 @@
 	path = tkWindget
 	url = https://github.com/Killberos-Tze/tkWindget.git
 [submodule "Figures"]
+	path = Figures
 	url = https://github.com/Killberos-Tze/Figures.git
