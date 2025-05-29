@@ -14,14 +14,13 @@ from RW_data.RW_files import Files_RW
 import os
 from tkinter import DISABLED, Frame, Button, StringVar, IntVar, DoubleVar
 
-class Test(AppFrame):
+class VolMeter_AmMeter(AppFrame):
     def __init__(self,**kwargs):
         super().__init__(**kwargs,appgeometry=(900,600,10,10))
         self.init_variables()
         self.init_frames()
         self.init_command_frame()
-        self.figure.plot.update_x_label("new X")
-        self.figure.plot.update_y_label("new Y1")
+        self.figure.plot.update_labels("new X","old Y1",'old Y2')
     
     def init_variables(self):
         pass
@@ -52,7 +51,7 @@ class Test(AppFrame):
         Button(self.command_frame, text="Clear data", command=self.placeholder,width=12,bg='lightgray').grid(row=rowcount,column=2)    
     
     def fake(self):
-        self.figure.plot.update_y2_label("new Y2")
+        self.figure.plot.update_labels(y2="new Y2")
         self.figure.canvas.draw()
         
     def fake2(self):

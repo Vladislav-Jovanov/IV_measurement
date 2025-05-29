@@ -1,11 +1,11 @@
 #!/usr/bin/env python3
 
-#from AppHub.Hub import MultipleApps
+from AppHub.Hub import MultipleApps
 
-from GUIs.test.test import Test
-#from GUIs.overlay3D.Afm3D import Afm3D
-#from GUIs.simple2D.Afm2D import Afm2D
+from GUIs.PS_AM.PS_AM import PowerSupply_AmMeter
+from GUIs.VM_AM.VM_AM import VolMeter_AmMeter
 
 
-#MultipleApps(app_list={'2D_display':Afm2D, 'Profile extraction':AfmApp, '3D_overlay':Afm3D}).init_start()
-Test().init_start()
+#MultipleApps(app_list={'PS AM':PowerSupply_AmMeter, 'VM AM':VolMeter_AmMeter}).init_start()
+
+MultipleApps(app_list={'PS AM':PowerSupply_AmMeter}).init_start()
