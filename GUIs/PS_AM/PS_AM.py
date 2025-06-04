@@ -11,7 +11,7 @@ from Figures.Figures import FigureXY2
 from numpy import append, newaxis
 from tkinter.filedialog import asksaveasfilename
 from RW_data.RW_files import Files_RW
-from RW_data.RW_files import Read_from.ini_inst
+from RW_data.RW_files import Read_from
 import os
 from tkinter import DISABLED, Frame, Button, StringVar, IntVar, DoubleVar, Toplevel
 from socket import socket
@@ -38,14 +38,15 @@ class IP_instrument(Toplevel):
         self.protocol("WM_DELETE_WINDOW",self.mywithdraw)
         self.protocol("WM_ICON_WINDOW",self.mywithdraw)#disable this button
         self.geometry('%dx%d+%d+%d' % geometry)
-        try:
-            self.ini=Read_from_ini_inst(file=file,extension=extension)
-        except:
+        
+        self.ini,error=Read_from.ini_inst(file=file,extension=extension)
+        if error:
             self.ini={}
             self.ini["ip_address"]=None
             self.ini["port"]=None
             self.ini["inst_name"]=""
         
+        print(self.ini)
         self.init_frame()
         self.init_elements()
         self.init_variables()
@@ -63,6 +64,7 @@ class IP_instrument(Toplevel):
         self.frameroot.pack(pady = (25,25), padx = (25,25))
     
     def init_elements(self):
+        print(f"{self.ini['inst_name']}")
         self.IPEntry=IPEntry(parent=self.frameroot,address=f"{self.ini['ip_address']}:{self.ini['port']}")
         self.IPEntry.grid(row=1,column=1)
         self.status=OnOffButton(parent=self.frameroot,commandon=self.connect,commandoff=self.disconnect)
