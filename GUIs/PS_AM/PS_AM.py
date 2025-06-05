@@ -39,14 +39,13 @@ class IP_instrument(Toplevel):
         self.protocol("WM_ICON_WINDOW",self.mywithdraw)#disable this button
         self.geometry('%dx%d+%d+%d' % geometry)
         
-        self.ini,error=Read_from.ini_inst(file=file,extension=extension)
-        if error:
+        self.ini=Read_from.ini_inst(file=file,extension=extension)
+        if self.ini['error']:
             self.ini={}
             self.ini["ip_address"]=None
             self.ini["port"]=None
             self.ini["inst_name"]=""
         
-        print(self.ini)
         self.init_frame()
         self.init_elements()
         self.init_variables()
