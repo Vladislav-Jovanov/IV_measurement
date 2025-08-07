@@ -6,12 +6,12 @@ Created on Wed Dec 11 06:48:12 2024
 @author: tze
 """
 
-from tkWindget.tkWindget import AppFrame, FigureFrame, IPEntry, OnOffButton
+from tkWindget.tkWindget import AppFrame, FigureFrame, IPEntry, OnOffButton, LabelButton
 from Figures.Figures import FigureXY2
 from numpy import append, newaxis
 from tkinter.filedialog import asksaveasfilename
 from RW_data.RW_files import Files_RW
-from RW_data.RW_files import Read_from
+from RW_data.RW_files import Read_from, Write_to
 import os
 from tkinter import DISABLED, Frame, Button, StringVar, IntVar, DoubleVar, Toplevel
 from socket import socket
@@ -20,7 +20,7 @@ from socket import socket
 
 
 class IP_instrument(Toplevel):
-    def __init__(self,file,extension,label=StringVar,geometry=(400,400,10,10),connect=None,disconnect=None):
+    def __init__(self,file,extension,label,geometry=(400,400,10,10),connect=None,disconnect=None):
         super().__init__()
         if connect==None:
             self.main_connect=self.placeholder
@@ -30,22 +30,21 @@ class IP_instrument(Toplevel):
             self.main_disconnect=self.placeholder
         else:
             self.main_disconnect=disconnect
-        if label==StringVar:
-            self.label=label()
-        else:
-            self.label=label
-            self.labeltext=label.get()
+        
+        self.label=label
+
         self.protocol("WM_DELETE_WINDOW",self.mywithdraw)
         self.protocol("WM_ICON_WINDOW",self.mywithdraw)#disable this button
         self.geometry('%dx%d+%d+%d' % geometry)
         
-        self.ini=Read_from.ini_inst(file=file,extension=extension)
+        self.ini=Read_from.ini_inst_proj(file=file,extension=extension)
         if self.ini['error']:
             self.ini={}
             self.ini["ip_address"]=None
             self.ini["port"]=None
             self.ini["inst_name"]=""
         
+
         self.init_frame()
         self.init_elements()
         self.init_variables()
@@ -63,7 +62,6 @@ class IP_instrument(Toplevel):
         self.frameroot.pack(pady = (25,25), padx = (25,25))
     
     def init_elements(self):
-        print(f"{self.ini['inst_name']}")
         self.IPEntry=IPEntry(parent=self.frameroot,address=f"{self.ini['ip_address']}:{self.ini['port']}")
         self.IPEntry.grid(row=1,column=1)
         self.status=OnOffButton(parent=self.frameroot,commandon=self.connect,commandoff=self.disconnect)
@@ -77,11 +75,10 @@ class IP_instrument(Toplevel):
         pass
     def connect(self):
         try:
-            #self.label.set("test")
             self.sock.connect((self.IPEntry.get_address(), self.IPEntry.get_port()))
             self.sock.send("*IDN?\n".encode('utf-8'))
-            tmp=self.sock.recv(1024).decode('utf-8')
-            self.label.set(tmp.split(',')[1]+'\n'+tmp.split(',')[2])
+            self.ini["inst_name"]=self.sock.recv(1024).decode('utf-8')
+            self.label.set_var(self.ini["inst_name"].split(',')[1]+'\n'+self.ini["inst_name"].split(',')[2])
             self.IPEntry.disable()
             self.main_connect()    
         except:
@@ -98,16 +95,14 @@ class IP_instrument(Toplevel):
 class PowerSupply_AmMeter(AppFrame):
     def __init__(self,**kwargs):
         super().__init__(**kwargs,appgeometry=(900,600,10,10))
-        self.init_variables()
         self.init_frames()
         self.init_command_frame()
+        self.init_variables()
         #self.figure.plot.update_labels("new X","old Y1",'old Y2')
     
     def init_variables(self):
         self.ps_ip_init=False
-        self.ps_name=StringVar()
-        self.ps_name.set("Connect Power Supply")
-        self.ps_level=IP_instrument(file=__file__,extension='psinst',label=self.ps_name)
+        self.ps_level=IP_instrument(file=__file__,extension='psinst',label=self.instrument)
         self.ps_level.mywithdraw()
     
     def init_frames(self):
@@ -126,7 +121,8 @@ class PowerSupply_AmMeter(AppFrame):
         
     def init_command_frame(self):
         rowcount=1
-        LabelButton(self.command_frame, textvariable=self.ps_name, command=self.setup_ps,width=18,bg='lightgray').grid(row=rowcount,column=1)
+        self.instrument=LabelButton(self.command_frame, text='Connect Power Supply', command=self.setup_ps,width=18,bg='lightgray')
+        self.instrument.grid(row=rowcount,column=1)
         rowcount+=1
         Button(self.command_frame, text="Get IP", command=self.get_ip,width=18,bg='lightgray').grid(row=rowcount,column=1)
         #Button(self.command_frame, text="Disconnect\ninstruments", command=self.placeholder,width=12,bg='lightgray').grid(row=rowcount,column=2)
