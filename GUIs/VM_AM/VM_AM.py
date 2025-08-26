@@ -16,7 +16,7 @@ from tkinter import DISABLED, Frame, Button, StringVar, IntVar, DoubleVar
 
 class VolMeter_AmMeter(AppFrame):
     def __init__(self,**kwargs):
-        super().__init__(**kwargs,appgeometry=(900,600,10,10))
+        super().__init__(**kwargs,file=__file__,appgeometry=(900,600,10,10))
         self.init_variables()
         self.init_frames()
         self.init_command_frame()

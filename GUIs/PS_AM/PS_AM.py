@@ -37,7 +37,7 @@ class IP_instrument(Toplevel):
         self.protocol("WM_ICON_WINDOW",self.mywithdraw)#disable this button
         self.geometry('%dx%d+%d+%d' % geometry)
         
-        self.ini=Read_from.ini_inst_proj(file=file,extension=extension)
+        self.ini=Read_from.ini_inst(file=file,extension=extension)
         if self.ini['error']:
             self.ini={}
             self.ini["ip_address"]=None
@@ -94,7 +94,7 @@ class IP_instrument(Toplevel):
 
 class PowerSupply_AmMeter(AppFrame):
     def __init__(self,**kwargs):
-        super().__init__(**kwargs,appgeometry=(900,600,10,10))
+        super().__init__(**kwargs,file=__file__,appgeometry=(900,600,10,10))
         self.init_frames()
         self.init_command_frame()
         self.init_variables()
