@@ -33,7 +33,6 @@ class FigureXY2(Figure):
     def __str__(self):
         return 'v_draw'
 
-    
     def add_canvas(self,canvas):
         self.canvas=canvas
         self.canvasdraw=self.canvas.draw
@@ -42,7 +41,10 @@ class FigureXY2(Figure):
         self._axy.set_xlabel(xname,fontsize=10, position=(0.5,0),labelpad=5)
 
     def _update_y_label(self,yname):
-        self._axy.set_ylabel(yname,fontsize=10, position=(0.5,0),labelpad=5,color='tab:blue')
+        if self._y2:
+            self._axy.set_ylabel(yname,fontsize=10, position=(0.5,0),labelpad=5,color='tab:blue')
+        else:
+            self._axy.set_ylabel(yname,fontsize=10, position=(0.5,0),labelpad=5)
 
     def _update_y2_label(self,y2name):
         if self._y2:
@@ -84,12 +86,17 @@ class FigureXY2(Figure):
         self.canvasdraw()
 
     def clear_xy_curves(self):
+        tmp=self._axy.get_legend()
+        if tmp:
+            tmp.remove()
         while len(self._axy.lines)!=0:
             self._axy.lines[-1].remove()
         self._axy.set_xlim(0,1)
         self._axy.set_ylim(0,1)
+        self.canvasdraw()
 
-    def plot_xy_curves(self,datalist={},masklist={}):#datalist is list of datadictionaries masklist is a list of checkboxes states
+    #plots xy sets of data that can be masked (masking assumes that you are sending either checkbox of on/off button reference)
+    def plot_xy_dict(self,datalist={},masklist={}):#datalist is list of datadictionaries masklist is a list of checkboxe references
         self.clear_xy_curves()
         if len(datalist)==len(masklist) and len(datalist)!=0:
             xmin=[]
@@ -113,10 +120,50 @@ class FigureXY2(Figure):
                     self._update_x_label(datalist[key]['#data_summary']['x1_name']+' '+'('+datalist[key]['#data_summary']['x1_prefix']+datalist[key]['#data_summary']['x1_unit']+')')
                 elif masklist[key].get_state() == 'off':
                     self._axy.plot([],[])
-            self._axy.legend(handles=handles,loc=(1,0))
-            
+            if len(handles):
+                self._axy.legend(handles=handles,loc=(1,0))
             self.canvasdraw()
-            
+
+    def plot_xy_lists(self,datalist=[],masklist=[]):#datalist is list of datadictionaries masklist is a list of checkboxe references
+        self.clear_xy_curves()
+        if len(datalist)==len(masklist) and len(datalist)!=0:
+            xmin=[]
+            xmax=[]
+            ymin=[]
+            ymax=[1]
+            handles=[]
+            self._axy.set_prop_cycle(None)
+            for key,item in enumerate(masklist):
+                if item.is_enabled() == False:
+                    x=datalist[key]['#data_table'][:,datalist[key]['#data_summary']['x1_col']]
+                    y=datalist[key]['#data_table'][:,datalist[key]['#data_summary']['y1_col']]
+                    xmin.append(npmin(x))
+                    xmax.append(npmax(x))
+                    ymin.append(self._find_min(y))
+                    ymax.append(self._find_max(y))
+                    self._axy.set_xlim(min(xmin),max(xmax))
+                    self._axy.set_ylim(min(ymin),max(ymax))
+                    tmp,=self._axy.plot(x,y,label=datalist[key]["#data_summary"]["y1_label"],linestyle=(0, (5, 10)))
+                    handles.append(tmp)
+                    self._update_x_label(datalist[key]['#data_summary']['x1_name']+' '+'('+datalist[key]['#data_summary']['x1_prefix']+datalist[key]['#data_summary']['x1_unit']+')')
+                elif item.get_state() == 'on':
+                    x=datalist[key]['#data_table'][:,datalist[key]['#data_summary']['x1_col']]
+                    y=datalist[key]['#data_table'][:,datalist[key]['#data_summary']['y1_col']]
+                    xmin.append(npmin(x))
+                    xmax.append(npmax(x))
+                    ymin.append(self._find_min(y))
+                    ymax.append(self._find_max(y))
+                    self._axy.set_xlim(min(xmin),max(xmax))
+                    self._axy.set_ylim(min(ymin),max(ymax))
+                    tmp,=self._axy.plot(x,y,label=datalist[key]["#data_summary"]["y1_label"])
+                    handles.append(tmp)
+                    self._update_x_label(datalist[key]['#data_summary']['x1_name']+' '+'('+datalist[key]['#data_summary']['x1_prefix']+datalist[key]['#data_summary']['x1_unit']+')')
+                elif masklist[key].get_state() == 'off':
+                    self._axy.plot([],[])
+            if len(handles):
+                self._axy.legend(handles=handles,loc=(1,0))
+            self.canvasdraw()
+
 #multpiple legends add_artist (old legend)
 
     #appends and then plots data
@@ -177,4 +224,90 @@ class FigureXY2(Figure):
             if 'y2' in kwargs and self._y2:
                 self._update_y2_label(kwargs['y2'])
             return
+        self.canvasdraw()
+
+class FigureLineMap(Figure):
+    def __init__(self,*args,figsize=(9.5/2.54,14/2.54),**kwargs):
+        #matplotlib muliplies axes size with large figure size that is why you always divide with large figure size
+        xdim=figsize[0]*2.54
+        ydim=figsize[1]*2.54
+        super().__init__(*args,figsize=figsize,**kwargs)
+        axx=7
+        axy=5
+        axx0=1.5
+        axy0=1.5
+        spacing=1.5
+        self._axy=self.add_axes((axx0/xdim,axy0/ydim,axx/xdim,axy/ydim))
+        self._axy.tick_params(labelsize=8)
+        self._axy2=self.add_axes([axx0/xdim,(axy0+axy+spacing)/ydim,axx/xdim,axy/ydim])
+        self._axy2.tick_params(labelsize=8)
+
+    def __str__(self):
+        return 'v_draw'
+
+    def add_canvas(self,canvas):
+        self.canvas=canvas
+        self.canvasdraw=self.canvas.draw
+
+    def _update_x_label(self,xname):
+        self._axy.set_xlabel(xname,fontsize=10, position=(0.5,0),labelpad=5)
+
+    def _update_x2_label(self,xname):
+        self._axy2.set_xlabel(xname,fontsize=10, position=(0.5,0),labelpad=5)
+
+    def _update_y_label(self,yname):
+        self._axy.set_ylabel(yname,fontsize=10, position=(0.5,0),labelpad=5)
+
+    def _update_y2_label(self,yname):
+        self._axy2.set_ylabel(yname,fontsize=10, position=(0.5,0),labelpad=5)
+
+    def plot_absorbance(self,R,T,A):
+        self.clear_absorbance()
+        self._axy.set_prop_cycle(None)
+        self._axy2.set_prop_cycle(None)
+        self._axy.set_ylim(0,1.02)
+        self._axy2.set_ylim(0,1.02)
+        xmin=[]
+        xmax=[]
+        handles=[]
+        handles2=[]
+        for item in [R,T,A]:
+            x=item['#data_table'][:,item['#data_summary']['x1_col']]
+            xmin.append(npmin(x))
+            xmax.append(npmax(x))
+            self._axy.set_xlim(min(xmin),max(xmax))
+            self._axy2.set_xlim(min(xmin),max(xmax))
+
+        xt=T['#data_table'][:,T['#data_summary']['x1_col']]
+        yt=T['#data_table'][:,T['#data_summary']['y1_col']]
+        labelt=T["#data_summary"]["y1_label"]
+        xr=R['#data_table'][:,R['#data_summary']['x1_col']]
+        yr=R['#data_table'][:,R['#data_summary']['y1_col']]
+        labelr='1-'+R["#data_summary"]["y1_label"]
+        xa=A['#data_table'][:,R['#data_summary']['x1_col']]
+        ya=A['#data_table'][:,R['#data_summary']['y1_col']]
+        labela=A["#data_summary"]["y1_label"]
+
+        tmp,=self._axy.plot(xt,yt,color='black',label=labelt)
+        handles.append(tmp)
+        tmp,=self._axy.plot(xr,1-yr,color='blue',label=labelr)
+        handles.append(tmp)
+        tmp=self._axy.fill_between(xr,yt,1-yr,color='red',label=labela)
+        handles.append(tmp)
+        self._axy.legend(handles=handles,loc=(1,0))
+
+        tmp,=self._axy2.plot(xa,ya,label=labela,color='red')
+        handles2.append(tmp)
+        self._axy2.legend(handles=handles2,loc=(1,0))
+        self._update_x2_label(A['#data_summary']['x1_name']+' ('+A['#data_summary']['x1_prefix']+A['#data_summary']['x1_unit']+')')
+        self._update_x_label(A['#data_summary']['x1_name']+' ('+A['#data_summary']['x1_prefix']+A['#data_summary']['x1_unit']+')')
+        self.canvasdraw()
+
+    def clear_absorbance(self):
+        while len(self._axy.collections):
+            self._axy.collections[-1].remove()
+        while len(self._axy.lines):
+            self._axy.lines[-1].remove()
+        while len(self._axy2.lines):
+            self._axy2.lines[-1].remove()
         self.canvasdraw()
