@@ -18,7 +18,7 @@ class FigureXY2(Figure):
         self.set_size_inches(figsize)
         self._axy=self.add_axes(axsize)
         self._axy.tick_params(labelsize=8)
-
+        self._axy.grid(color='lightgray', which='major', axis='both')
         self._y2=y2
 
         if self._y2:
@@ -26,7 +26,9 @@ class FigureXY2(Figure):
             self._axy2=self._axy.twinx()
             self._axy2.tick_params(labelsize=8)
             self._axy.tick_params(axis='y',labelcolor='tab:blue')
+            self._axy.grid(color="tab:blue",ls='--',which='major', axis='y')
             self._axy2.tick_params(axis='y',labelcolor='tab:red')
+            self._axy2.grid(color="tab:red",ls=':',which='major', axis='y')
 
         self._init_figure()
 
@@ -70,7 +72,7 @@ class FigureXY2(Figure):
 
     #not private
     #plots the data it receives (appending should be done in main if needed)
-    def plot_measured_data(self,x,y,y2=None):#x, y, y2 are just numpy arrays
+    def plot_data(self,x,y,y2=None):#x, y, y2 are just numpy arrays
         if len(x)==len(y):
             self._axy.set_xlim(self._find_min(x),self._find_max(x))
             self._axy.set_ylim(self._find_min(y),self._find_max(y))
@@ -96,7 +98,7 @@ class FigureXY2(Figure):
         self.canvasdraw()
 
     #plots xy sets of data that can be masked (masking assumes that you are sending either checkbox of on/off button reference)
-    def plot_xy_dict(self,datalist={},masklist={}):#datalist is list of datadictionaries masklist is a list of checkboxe references
+    def plot_xy_dict(self,datalist={},masklist={}):#datalist is dictionary of datadictionaries masklist is a dictionary of checkboxe references
         self.clear_xy_curves()
         if len(datalist)==len(masklist) and len(datalist)!=0:
             xmin=[]
@@ -167,7 +169,7 @@ class FigureXY2(Figure):
 #multpiple legends add_artist (old legend)
 
     #appends and then plots data
-    def append_plot_data(self,x,y,y2):
+    def append_plot_data(self,x,y,y2=None):
         if len(self._axy.lines)!=0:
             xold=self._axy.lines[-1].get_xdata()
             yold=self._axy.lines[-1].get_ydata()
@@ -226,6 +228,10 @@ class FigureXY2(Figure):
             return
         self.canvasdraw()
 
+    def set_x_grid_lines(self,num):
+        self._axy.locator_params(axis='x', nbins=num)
+        self.canvasdraw()
+
 class FigureLineMap(Figure):
     def __init__(self,*args,figsize=(9.5/2.54,14/2.54),**kwargs):
         #matplotlib muliplies axes size with large figure size that is why you always divide with large figure size
@@ -239,8 +245,10 @@ class FigureLineMap(Figure):
         spacing=1.5
         self._axy=self.add_axes((axx0/xdim,axy0/ydim,axx/xdim,axy/ydim))
         self._axy.tick_params(labelsize=8)
+        self._axy.grid(color='lightgray', which='major', axis='both')
         self._axy2=self.add_axes([axx0/xdim,(axy0+axy+spacing)/ydim,axx/xdim,axy/ydim])
         self._axy2.tick_params(labelsize=8)
+        self._axy2.grid(color='lightgray', which='major', axis='both')
 
     def __str__(self):
         return 'v_draw'
