@@ -6,11 +6,11 @@ Created on Wed Dec 11 06:48:12 2024
 @author: tze
 """
 
-from tkWindget.tkWindget import AppFrame, FigureFrame
-from Figures.Figures import FigureXY2
+from submodules.tkWindget import AppFrame, FigureFrame
+from submodules.Figures import FigureXY2
 from numpy import append, newaxis
 from tkinter.filedialog import asksaveasfilename
-from RW_data.RW_files import Files_RW
+from submodules.RW_files import Files_RW
 import os
 from tkinter import DISABLED, Frame, Button, StringVar, IntVar, DoubleVar
 

@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 
-from AppHub.Hub import MultipleApps
+from submodules.Hub import MultipleApps
 
 from GUIs.PS_AM.PS_AM import PowerSupply_AmMeter
 from GUIs.VM_AM.VM_AM import VolMeter_AmMeter
